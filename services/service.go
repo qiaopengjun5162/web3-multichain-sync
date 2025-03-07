@@ -35,6 +35,18 @@ func (bws *BusinessMiddleWireServices) Stop(ctx context.Context) error {
 	return nil
 }
 
+func (bws *BusinessMiddleWireServices) Stopped() bool {
+	return bws.stopped.Load()
+}
+
+func NewBusinessMiddleWireServices(db *database.DB, config *BusinessMiddleConfig, accountClient *rpcclient.WalletChainAccountClient) (*BusinessMiddleWireServices, error) {
+	return &BusinessMiddleWireServices{
+		BusinessMiddleConfig: config,
+		accountClient:        accountClient,
+		db:                   db,
+	}, nil
+}
+
 func (bws *BusinessMiddleWireServices) Start(ctx context.Context) error {
 	go func(bws *BusinessMiddleWireServices) {
 		addr := fmt.Sprintf("%s:%d", bws.GrpcHostname, bws.GrpcPort)

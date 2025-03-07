@@ -4,9 +4,12 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/qiaopengjun5162/web3-multichain-sync/rpcclient"
 	"gorm.io/gorm"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+
+	"github.com/qiaopengjun5162/web3-multichain-sync/rpcclient"
 )
 
 type Blocks struct {
@@ -14,6 +17,15 @@ type Blocks struct {
 	ParentHash common.Hash `gorm:"serializer:bytes"`
 	Number     *big.Int    `gorm:"serializer:u256"`
 	Timestamp  uint64
+}
+
+func BlockHeaderFromHeader(header *types.Header) rpcclient.BlockHeader {
+	return rpcclient.BlockHeader{
+		Hash:       header.Hash(),
+		ParentHash: header.ParentHash,
+		Number:     header.Number,
+		Timestamp:  header.Time,
+	}
 }
 
 type BlocksView interface {

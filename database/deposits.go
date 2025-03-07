@@ -124,9 +124,22 @@ func (db *depositsDB) StoreDeposits(requestId string, depositList []*Deposits) e
 }
 
 // UpdateDepositsConfirms 查询所有还没有过确认位交易，用最新区块减去对应区块更新确认，如果这个大于我们预设的确认位，那么这笔交易可以认为已经入账
+// UpdateDepositsConfirms 更新存款确认数。
+// 该函数通过事务处理，根据指定的请求ID、区块编号和确认数，更新数据库中符合条件的存款记录的确认数和状态。
+// 参数:
+//
+//	requestId - 请求的唯一标识符。
+//	blockNumber - 当前的区块编号。
+//	confirms - 当前的确认数。
+//
+// 返回值:
+//
+//	如果执行成功，则返回nil；否则返回错误。
 func (db *depositsDB) UpdateDepositsConfirms(requestId string, blockNumber uint64, confirms uint64) error {
 	return db.gorm.Transaction(func(tx *gorm.DB) error {
 		var unConfirmDeposits []*Deposits
+
+		// 查询未确认的存款记录。
 		result := tx.Table("deposits_"+requestId).
 			Where("block_number <= ? AND status = ?", blockNumber, TxStatusBroadcasted).
 			Find(&unConfirmDeposits)
@@ -134,19 +147,24 @@ func (db *depositsDB) UpdateDepositsConfirms(requestId string, blockNumber uint6
 			return result.Error
 		}
 
+		// 遍历并更新每个未确认的存款记录。
 		for _, deposit := range unConfirmDeposits {
 			chainConfirm := blockNumber - deposit.BlockNumber.Uint64()
 			if chainConfirm >= confirms {
+				// 如果链上确认数达到或超过所需确认数，将存款记录标记为已完成。
 				deposit.Confirms = uint8(confirms)
 				deposit.Status = TxStatusWalletDone
 			} else {
+				// 否则，更新当前的确认数。
 				deposit.Confirms = uint8(chainConfirm)
 			}
+			// 保存更新后的存款记录。
 			if err := tx.Table("deposits_" + requestId).Save(&deposit).Error; err != nil {
 				return err
 			}
 		}
 
+		// 事务执行成功，返回nil。
 		return nil
 	})
 }

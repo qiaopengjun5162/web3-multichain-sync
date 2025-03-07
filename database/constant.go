@@ -9,7 +9,7 @@ import (
 type TxStatus string
 
 const (
-	TxStatusCreateUnsigned TxStatus = "create_unsign"
+	TxStatusCreateUnsigned TxStatus = "create_unsigned"
 	TxStatusSigned         TxStatus = "signed"
 	TxStatusBroadcasted    TxStatus = "broadcasted"
 	TxStatusWalletDone     TxStatus = "wallet_done"

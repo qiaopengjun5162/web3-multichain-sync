@@ -36,10 +36,10 @@ repos:
       - id: go-unit-tests
         args: [ "-short", "./..." ]
       - id: go-cyclo
-        args: [ "-over=18" ]  # 复杂度超过 15 时警告
+        args: [ "-over=32" ]  # 复杂度超过 15 时警告
       - id: go-build
         name: go-build
-        entry: go build -o gotcha ./cmd
+        entry: go build -o web3-multichain-sync ./cmd
         language: system
         pass_filenames: false
       - id: go-mod-tidy

@@ -72,7 +72,7 @@ jobs:
 
       # Build Go binary
       - name: Build Go binary
-        run: go build -v -o gotcha ./cmd
+        run: go build -v -o web3-multichain-sync ./cmd
 
       # Generate changelog (only on tag push)
       - name: Ensure CHANGELOG.md exists

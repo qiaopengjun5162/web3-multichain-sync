@@ -35,7 +35,15 @@ var (
 	//maxPriorityFeePerGas        = "535177480"
 )
 
+// BusinessRegister 业务注册函数
+// 该函数接收一个BusinessRegisterRequest对象作为参数，并返回一个BusinessRegisterResponse对象和一个错误对象。
+// 主要功能包括：
+// 1. 验证请求参数的有效性。
+// 2. 创建并初始化一个Business对象。
+// 3. 将Business对象存储到数据库中。
+// 4. 根据业务UID创建动态表。
 func (bws *BusinessMiddleWireServices) BusinessRegister(ctx context.Context, request *wallet_go.BusinessRegisterRequest) (*wallet_go.BusinessRegisterResponse, error) {
+	// 检查请求参数是否有效
 	if request.RequestId == "" || request.NotifyUrl == "" {
 		return &wallet_go.BusinessRegisterResponse{
 			Code: wallet_go.ReturnCode_ERROR,
@@ -43,6 +51,7 @@ func (bws *BusinessMiddleWireServices) BusinessRegister(ctx context.Context, req
 		}, nil
 	}
 
+	// 创建并初始化一个Business对象
 	business := &database.Business{
 		GUID:        uuid.New(),
 		BusinessUid: request.RequestId,
@@ -50,6 +59,7 @@ func (bws *BusinessMiddleWireServices) BusinessRegister(ctx context.Context, req
 		Timestamp:   uint64(time.Now().Unix()),
 	}
 
+	// 将Business对象存储到数据库中
 	err := bws.db.Business.StoreBusiness(business)
 	if err != nil {
 		log.Error("store business fail", "err", err)
@@ -59,8 +69,10 @@ func (bws *BusinessMiddleWireServices) BusinessRegister(ctx context.Context, req
 		}, nil
 	}
 
+	// 根据业务UID创建动态表
 	dynamic.CreateTableFromTemplate(request.RequestId, bws.db)
 
+	// 返回成功响应
 	return &wallet_go.BusinessRegisterResponse{
 		Code: wallet_go.ReturnCode_SUCCESS,
 		Msg:  "config business success",
